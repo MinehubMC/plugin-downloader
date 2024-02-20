@@ -1,0 +1,22 @@
+{
+  "credentials": {
+    "github": {
+      "username": "$GITHUB_PACKAGES_USERNAME",
+      "password": "$GITHUB_PACKAGES_TOKEN"
+    }
+  },
+  "plugins": [
+    {
+      "repositoryUrl": "https://maven.pkg.github.com/minehubmc/minecore",
+      "credentials": "github",
+      "artifact": "live.minehub:minecore:0.0.15"
+    },
+    {
+      "downloadUrl": "https://some.hosting.somewhere.com/example-plugin.jar"
+    },
+    {
+      "repositoryUrl": "something else",
+      "artifact": "something else"
+    }
+  ]
+}
