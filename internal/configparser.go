@@ -20,6 +20,24 @@ type Plugin struct {
 	Artifact      string `json:"artifact,omitempty"`
 }
 
+func (p Plugin) GetDownloadURL() string {
+	if p.DownloadUrl != "" {
+		return p.DownloadUrl
+	}
+	if p.RepositoryUrl != "" && p.Artifact != "" {
+		parts := strings.Split(p.Artifact, ":")
+		if len(parts) != 3 {
+			return "" // invalid format
+		}
+		groupId := strings.ReplaceAll(parts[0], ".", "/")
+		artifactId := parts[1]
+		version := parts[2]
+
+		return fmt.Sprintf("%s/%s/%s/%s/%s-%s.jar", p.RepositoryUrl, groupId, artifactId, version, artifactId, version)
+	}
+	return ""
+}
+
 type Config struct {
 	Credentials map[string]Credentials `json:"credentials"`
 	Plugins     []Plugin               `json:"plugins"`
@@ -65,6 +83,7 @@ func Parse(filePath string) {
 		fmt.Println("Download URL:", plugin.DownloadUrl)
 		fmt.Println("Credentials:", plugin.Credentials)
 		fmt.Println("Artifact:", plugin.Artifact)
+		fmt.Println("download:", plugin.GetDownloadURL())
 		fmt.Println()
 	}
 }
