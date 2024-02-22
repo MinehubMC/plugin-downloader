@@ -18,6 +18,7 @@ var (
 		Long:  "It reads a .json file and downloads the plugins to a specified folder. Created for easier creation of docker images.",
 		Run: func(cmd *cobra.Command, args []string) {
 			internal.Parse(configFilePath)
+			internal.PrepareOutputFolder(outputFolder)
 		},
 	}
 )
