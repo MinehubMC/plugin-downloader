@@ -3,6 +3,7 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 )
@@ -27,14 +28,14 @@ type Config struct {
 func Parse(filePath string) {
 	file, err := os.Open(filePath)
 	if err != nil {
-		fmt.Println("Error opening JSON file:", err)
+		log.Fatal("Error opening JSON file: ", err)
 		return
 	}
 	defer file.Close()
 
 	var config Config
 	if err := json.NewDecoder(file).Decode(&config); err != nil {
-		fmt.Println("Error decoding JSON:", err)
+		log.Fatal("Error decoding JSON: ", err)
 		return
 	}
 
@@ -42,12 +43,12 @@ func Parse(filePath string) {
 	for key, creds := range config.Credentials {
 		creds.Username, err = replaceEnvVar(creds.Username)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
 		creds.Password, err = replaceEnvVar(creds.Password)
 		if err != nil {
-			panic(err)
+			log.Fatal(err)
 		}
 
 		config.Credentials[key] = creds
