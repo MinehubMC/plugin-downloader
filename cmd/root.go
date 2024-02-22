@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/minehubmc/plugin-downloader/internal"
 	"github.com/spf13/cobra"
 )
 
@@ -18,6 +19,7 @@ var (
 		Run: func(cmd *cobra.Command, args []string) {
 			// do something
 			log.Default().Println("hello", args, configFilePath)
+			internal.Parse(configFilePath)
 		},
 	}
 )
