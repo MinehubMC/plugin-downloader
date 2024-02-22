@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/minehubmc/plugin-downloader/internal"
@@ -18,7 +19,9 @@ var (
 		Long:  "It reads a .json file and downloads the plugins to a specified folder. Created for easier creation of docker images.",
 		Run: func(cmd *cobra.Command, args []string) {
 			internal.Parse(configFilePath)
-			internal.PrepareOutputFolder(outputFolder)
+			if err := internal.PrepareOutputFolder(outputFolder); err != nil {
+				log.Fatal(err)
+			}
 		},
 	}
 )
