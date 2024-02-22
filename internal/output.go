@@ -2,9 +2,30 @@ package internal
 
 import (
 	"fmt"
+	"io"
 	"os"
 	"path/filepath"
 )
+
+func SaveContentToFile(filename string, content io.ReadCloser, outdir string) error {
+	defer content.Close()
+
+	// Create the file to save the content
+	filePath := filepath.Join(outdir, filename)
+	file, err := os.Create(filePath)
+	if err != nil {
+		return fmt.Errorf("error creating file: %v", err)
+	}
+	defer file.Close()
+
+	// Copy content to the file
+	if _, err := io.Copy(file, content); err != nil {
+		return fmt.Errorf("error copying content to file: %v", err)
+	}
+
+	fmt.Printf("Content saved to %s\n", filePath)
+	return nil
+}
 
 func PrepareOutputFolder(outputPath string) error {
 	// Verify if the output folder exists, otherwise create it
@@ -16,8 +37,6 @@ func PrepareOutputFolder(outputPath string) error {
 		fmt.Println("Output folder created successfully.")
 	} else if err != nil {
 		return fmt.Errorf("error checking output folder: %v", err)
-	} else {
-		fmt.Println("Output folder already exists.")
 	}
 
 	// Check if the current user can read and write to the output folder

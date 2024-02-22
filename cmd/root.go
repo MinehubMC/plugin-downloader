@@ -18,9 +18,20 @@ var (
 		Short: "Automatically download required plugins/dependencies for minecraft servers.",
 		Long:  "It reads a .json file and downloads the plugins to a specified folder. Created for easier creation of docker images.",
 		Run: func(cmd *cobra.Command, args []string) {
-			internal.Parse(configFilePath)
+			config := internal.Parse(configFilePath)
 			if err := internal.PrepareOutputFolder(outputFolder); err != nil {
 				log.Fatal(err)
+			}
+
+			errs := internal.Download(config, outputFolder)
+
+			if len(errs) > 0 {
+				for _, err := range errs {
+					log.Println("ERROR:", err.Error())
+				}
+				os.Exit(1)
+			} else {
+				os.Exit(0)
 			}
 		},
 	}

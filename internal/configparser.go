@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"strings"
 )
 
@@ -38,23 +39,27 @@ func (p Plugin) GetDownloadURL() string {
 	return ""
 }
 
+func (p Plugin) Filename() string {
+	return filepath.Base(p.GetDownloadURL())
+}
+
 type Config struct {
 	Credentials map[string]Credentials `json:"credentials"`
 	Plugins     []Plugin               `json:"plugins"`
 }
 
-func Parse(filePath string) {
+func Parse(filePath string) *Config {
 	file, err := os.Open(filePath)
 	if err != nil {
 		log.Fatal("Error opening JSON file: ", err)
-		return
+		return nil
 	}
 	defer file.Close()
 
 	var config Config
 	if err := json.NewDecoder(file).Decode(&config); err != nil {
 		log.Fatal("Error decoding JSON: ", err)
-		return
+		return nil
 	}
 
 	// Replace $ prefix strings in credential fields with environment variables
@@ -72,20 +77,7 @@ func Parse(filePath string) {
 		config.Credentials[key] = creds
 	}
 
-	fmt.Println("Credentials:")
-	for key, creds := range config.Credentials {
-		fmt.Printf("%s: Username: %s, Password: %s\n", key, creds.Username, creds.Password)
-	}
-
-	fmt.Println("\nPlugins:")
-	for _, plugin := range config.Plugins {
-		fmt.Println("Repository URL:", plugin.RepositoryUrl)
-		fmt.Println("Download URL:", plugin.DownloadUrl)
-		fmt.Println("Credentials:", plugin.Credentials)
-		fmt.Println("Artifact:", plugin.Artifact)
-		fmt.Println("download:", plugin.GetDownloadURL())
-		fmt.Println()
-	}
+	return &config
 }
 
 func replaceEnvVar(s string) (string, error) {
