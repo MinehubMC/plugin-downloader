@@ -1,0 +1,22 @@
+name: Plugin Downloader
+description: Download a set of dependencies for minecraft servers with a single command
+author: Midka <me@midka.dev>
+
+inputs:
+  config-file:
+    description: Path to the configuration file, default is ./dependencies.json
+    required: false
+  output-folder:
+    description: Path to the output folder where dependencies are downloaded to, default is .
+    required: false
+  version:
+    description: Version of plugin-downloader to use, default is latest
+    required: false
+    default: latest
+
+runs:
+  using: docker
+  image: ghcr.io/minehubmc/plugin-downloader:${{ inputs.version }}
+  args:
+    - ${{ if inputs.config-file }} --config ${inputs.config-file} ${{ endif }}
+    - ${{ if inputs.output-folder }} --out ${inputs.output-folder} ${{ endif }}
