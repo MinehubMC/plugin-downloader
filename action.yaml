@@ -1,6 +1,9 @@
 name: Plugin Downloader
 description: Download a set of dependencies for minecraft servers with a single command
 author: Midka <me@midka.dev>
+branding:
+  icon: archive
+  color: gray-dark
 
 inputs:
   config-file:
