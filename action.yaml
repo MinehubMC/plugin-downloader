@@ -12,14 +12,10 @@ inputs:
   output-folder:
     description: Path to the output folder where dependencies are downloaded to, default is .
     required: false
-  version:
-    description: Version of plugin-downloader to use, default is latest
-    required: false
-    default: latest
 
 runs:
   using: docker
-  image: ghcr.io/minehubmc/plugin-downloader:${{ inputs.version }}
+  image: ghcr.io/minehubmc/plugin-downloader:latest
   args:
-    - ${{ if inputs.config-file }} --config ${inputs.config-file} ${{ endif }}
-    - ${{ if inputs.output-folder }} --out ${inputs.output-folder} ${{ endif }}
+    - ${{ inputs.config-file && '--config ' + inputs.config-file }}
+    - ${{ inputs.output-folder && '--out ' + inputs.output-folder }}
