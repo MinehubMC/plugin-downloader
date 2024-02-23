@@ -3,13 +3,15 @@ package internal
 import (
 	"fmt"
 	"net/http"
+
+	"go.uber.org/zap"
 )
 
-func Download(config *Config, outdir string) []error {
+func Download(config *Config, outdir string, logger *zap.Logger) []error {
 	var errs []error
 
 	for _, value := range config.Plugins {
-		err := handlePlugin(value, config, outdir)
+		err := handlePlugin(value, config, outdir, logger)
 
 		if err != nil {
 			errs = append(errs,
@@ -22,7 +24,7 @@ func Download(config *Config, outdir string) []error {
 	return errs
 }
 
-func handlePlugin(plugin Plugin, config *Config, outdir string) error {
+func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logger) error {
 	if plugin.GetDownloadURL() == "" {
 		return nil
 	}
@@ -45,7 +47,7 @@ func handlePlugin(plugin Plugin, config *Config, outdir string) error {
 		req.SetBasicAuth(creds.Username, creds.Password)
 	}
 
-	fmt.Printf("Downloading plugin from %s\n", plugin.GetDownloadURL())
+	logger.Info("Downloading plugin", zap.String("url", plugin.GetDownloadURL()))
 	response, err := httpClient.Do(req)
 
 	if err != nil {
@@ -59,7 +61,7 @@ func handlePlugin(plugin Plugin, config *Config, outdir string) error {
 	err = SaveContentToFile(plugin.Filename(), response.Body, outdir)
 
 	if err != nil {
-		fmt.Println("error: %w", err)
+		logger.Error("Failed to save downloaded content into file", zap.Error(err))
 	}
 
 	return nil

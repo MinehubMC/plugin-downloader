@@ -5,6 +5,8 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+
+	"go.uber.org/zap"
 )
 
 func SaveContentToFile(filename string, content io.ReadCloser, outdir string) error {
@@ -27,14 +29,14 @@ func SaveContentToFile(filename string, content io.ReadCloser, outdir string) er
 	return nil
 }
 
-func PrepareOutputFolder(outputPath string) error {
+func PrepareOutputFolder(outputPath string, logger *zap.Logger) error {
 	// Verify if the output folder exists, otherwise create it
 	if _, err := os.Stat(outputPath); os.IsNotExist(err) {
-		fmt.Println("Output folder does not exist. Creating...")
+		logger.Info("Output folder does not exist. Creating...")
 		if err := os.MkdirAll(outputPath, 0755); err != nil {
 			return fmt.Errorf("error creating output folder: %v", err)
 		}
-		fmt.Println("Output folder created successfully.")
+		logger.Info("Output folder created successfully.")
 	} else if err != nil {
 		return fmt.Errorf("error checking output folder: %v", err)
 	}

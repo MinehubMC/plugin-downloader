@@ -7,6 +7,7 @@ import (
 
 	"github.com/minehubmc/plugin-downloader/internal"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
 )
 
 var (
@@ -18,16 +19,22 @@ var (
 		Short: "Automatically download required plugins/dependencies for minecraft servers.",
 		Long:  "It reads a .json file and downloads the plugins to a specified folder. Created for easier creation of docker images.",
 		Run: func(cmd *cobra.Command, args []string) {
-			config := internal.Parse(configFilePath)
-			if err := internal.PrepareOutputFolder(outputFolder); err != nil {
+			logger, err := zap.NewDevelopment()
+
+			if err != nil {
+				log.Fatal("failed to create zap logger", err)
+			}
+
+			config := internal.Parse(configFilePath, logger)
+			if err := internal.PrepareOutputFolder(outputFolder, logger); err != nil {
 				log.Fatal(err)
 			}
 
-			errs := internal.Download(config, outputFolder)
+			errs := internal.Download(config, outputFolder, logger)
 
 			if len(errs) > 0 {
 				for _, err := range errs {
-					log.Println("ERROR:", err.Error())
+					logger.Error(err.Error())
 				}
 				os.Exit(1)
 			} else {

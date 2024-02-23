@@ -3,10 +3,11 @@ package internal
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
+
+	"go.uber.org/zap"
 )
 
 type Credentials struct {
@@ -48,30 +49,28 @@ type Config struct {
 	Plugins     []Plugin               `json:"plugins"`
 }
 
-func Parse(filePath string) *Config {
+func Parse(filePath string, logger *zap.Logger) *Config {
 	file, err := os.Open(filePath)
 	if err != nil {
-		log.Fatal("Error opening JSON file: ", err)
-		return nil
+		logger.Fatal("Error opening JSON file", zap.Error(err))
 	}
 	defer file.Close()
 
 	var config Config
 	if err := json.NewDecoder(file).Decode(&config); err != nil {
-		log.Fatal("Error decoding JSON: ", err)
-		return nil
+		logger.Fatal("Error decoding JSON", zap.Error(err))
 	}
 
 	// Replace $ prefix strings in credential fields with environment variables
 	for key, creds := range config.Credentials {
 		creds.Username, err = replaceEnvVar(creds.Username)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal("Failed to replace username from env", zap.Error(err))
 		}
 
 		creds.Password, err = replaceEnvVar(creds.Password)
 		if err != nil {
-			log.Fatal(err)
+			logger.Fatal("Failed to replace password from env", zap.Error(err))
 		}
 
 		config.Credentials[key] = creds
