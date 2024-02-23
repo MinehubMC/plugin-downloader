@@ -37,7 +37,11 @@ archives:
         format: zip
 
 dockers:
-  - image_templates: ['ghcr.io/minehubmc/plugin-downloader:{{ .Tag }}']
+  - image_templates:
+      [
+        'ghcr.io/minehubmc/plugin-downloader:{{ .Tag }}',
+        'ghcr.io/minehubmc/plugin-downloader:latest',
+      ]
     dockerfile: Dockerfile.goreleaser
     goos: linux
     goarch: amd64
