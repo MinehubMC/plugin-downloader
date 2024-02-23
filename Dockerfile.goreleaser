@@ -1,0 +1,6 @@
+FROM gcr.io/distroless/base:nonroot
+
+ADD plugin-downloader /usr/local/bin/plugin-downloader
+
+USER nonroot
+ENTRYPOINT ["plugin-downloader"]

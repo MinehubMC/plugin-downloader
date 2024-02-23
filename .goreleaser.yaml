@@ -36,6 +36,20 @@ archives:
       - goos: windows
         format: zip
 
+dockers:
+  - image_templates: ['ghcr.io/minehubmc/plugin-downloader:{{ .Tag }}']
+    dockerfile: Dockerfile.goreleaser
+    goos: linux
+    goarch: amd64
+    build_flag_templates:
+      - --label=org.opencontainers.image.title={{ .ProjectName }}
+      - --label=org.opencontainers.image.description={{ .ProjectName }}
+      - --label=org.opencontainers.image.url=https://github.com/minehubmc/plugin-downloader
+      - --label=org.opencontainers.image.source=https://github.com/minehubmc/plugin-downloader
+      - --label=org.opencontainers.image.version={{ .Version }}
+      - --label=org.opencontainers.image.created={{ time "2006-01-02T15:04:05Z07:00" }}
+      - --label=org.opencontainers.image.revision={{ .FullCommit }}
+
 changelog:
   sort: asc
   filters:
