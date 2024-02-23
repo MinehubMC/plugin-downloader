@@ -9,7 +9,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func SaveContentToFile(filename string, content io.ReadCloser, outdir string) error {
+func SaveContentToFile(filename string, content io.ReadCloser, outdir string, logger *zap.Logger) error {
 	defer content.Close()
 
 	// Create the file to save the content
@@ -25,7 +25,7 @@ func SaveContentToFile(filename string, content io.ReadCloser, outdir string) er
 		return fmt.Errorf("error copying content to file: %v", err)
 	}
 
-	fmt.Printf("Content saved to %s\n", filePath)
+	logger.Info("Content saved", zap.String("filename", filename))
 	return nil
 }
 

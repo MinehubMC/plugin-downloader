@@ -58,7 +58,7 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 		return fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
-	err = SaveContentToFile(plugin.Filename(), response.Body, outdir)
+	err = SaveContentToFile(plugin.Filename(), response.Body, outdir, logger)
 
 	if err != nil {
 		logger.Error("Failed to save downloaded content into file", zap.Error(err))
