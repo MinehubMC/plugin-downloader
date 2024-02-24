@@ -25,7 +25,7 @@ func SaveContentToFile(filename string, content io.ReadCloser, outdir string, lo
 		return fmt.Errorf("error copying content to file: %v", err)
 	}
 
-	logger.Info("Content saved", zap.String("path", filePath))
+	logger.Info("Content saved", zap.String("path", filePath), zap.String("outdir", outdir))
 	return nil
 }
 
