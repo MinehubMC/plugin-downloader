@@ -25,7 +25,7 @@ func SaveContentToFile(filename string, content io.ReadCloser, outdir string, lo
 		return fmt.Errorf("error copying content to file: %v", err)
 	}
 
-	logger.Info("Content saved", zap.String("filename", filename))
+	logger.Info("Content saved", zap.String("path", filePath))
 	return nil
 }
 
@@ -39,6 +39,8 @@ func PrepareOutputFolder(outputPath string, logger *zap.Logger) error {
 		logger.Info("Output folder created successfully.")
 	} else if err != nil {
 		return fmt.Errorf("error checking output folder: %v", err)
+	} else {
+		logger.Info("Output path exists.")
 	}
 
 	// Check if the current user can read and write to the output folder
