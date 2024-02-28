@@ -20,6 +20,7 @@ type Plugin struct {
 	DownloadUrl   string `json:"downloadUrl,omitempty"`
 	Credentials   string `json:"credentials,omitempty"`
 	Artifact      string `json:"artifact,omitempty"`
+	SaveAs        string `json:"saveAs,omitempty"`
 }
 
 func (p Plugin) GetDownloadURL() string {
@@ -41,6 +42,11 @@ func (p Plugin) GetDownloadURL() string {
 }
 
 func (p Plugin) Filename() string {
+	// sometimes the download url may end with /download so it won't have the .jar extension and stuff like that
+	if p.SaveAs != "" {
+		return p.SaveAs
+	}
+
 	return filepath.Base(p.GetDownloadURL())
 }
 

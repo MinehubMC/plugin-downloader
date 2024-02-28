@@ -12,7 +12,8 @@
       "artifact": "live.minehub:minecore:0.0.15"
     },
     {
-      "downloadUrl": "https://some.hosting.somewhere.com/example-plugin.jar"
+      "downloadUrl": "https://some.hosting.somewhere.com/example-plugin.jar",
+      "saveAs": "example-plugin.jar"
     },
     {
       "repositoryUrl": "something else",
