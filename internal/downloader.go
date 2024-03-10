@@ -6,14 +6,26 @@ import (
 	"net/http"
 	"os/exec"
 	"path/filepath"
+	"strings"
 
 	"go.uber.org/zap"
 )
 
-func Download(config *Config, outdir string, logger *zap.Logger) []error {
+func Download(config *Config, outdir string, logger *zap.Logger, tags []string) []error {
 	var errs []error
 
+	checkTags := len(tags) != 0
+
+	if checkTags {
+		logger.Info("Filtering based on tags", zap.String("tags", strings.Join(tags, ",")))
+	}
+
 	for _, value := range config.Plugins {
+		if checkTags && !commonTags(tags, value.Tags) {
+			logger.Info("Skipping plugin, not included in tags", zap.String("plugin", value.Filename()), zap.String("tags", strings.Join(value.Tags, ",")))
+			continue
+		}
+
 		err := handlePlugin(value, config, outdir, logger)
 
 		if err != nil {
@@ -90,4 +102,16 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 	}
 
 	return nil
+}
+
+func commonTags(filterTags, tagsToCheck []string) bool {
+	for _, filterTag := range filterTags {
+		for _, tagToCheck := range tagsToCheck {
+			if filterTag == tagToCheck {
+				return true
+			}
+		}
+	}
+
+	return false
 }

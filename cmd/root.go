@@ -30,7 +30,13 @@ var (
 				log.Fatal(err)
 			}
 
-			errs := internal.Download(config, outputFolder, logger)
+			filterTags, err := cmd.PersistentFlags().GetStringSlice("tags")
+
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			errs := internal.Download(config, outputFolder, logger, filterTags)
 
 			if len(errs) > 0 {
 				for _, err := range errs {
@@ -47,7 +53,7 @@ var (
 func init() {
 	rootCmd.PersistentFlags().StringVar(&configFilePath, "config", "dependencies.json", "config file (default is $PWD/dependencies.json)")
 	rootCmd.PersistentFlags().StringVar(&outputFolder, "out", ".", "download output folder (default is .)")
-
+	rootCmd.PersistentFlags().StringSlice("tags", []string{}, "comma-separated list of tags to filter plugins by")
 }
 
 func Execute() {
