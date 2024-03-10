@@ -2,7 +2,10 @@ package internal
 
 import (
 	"fmt"
+	"log"
 	"net/http"
+	"os/exec"
+	"path/filepath"
 
 	"go.uber.org/zap"
 )
@@ -62,6 +65,29 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 
 	if err != nil {
 		logger.Error("Failed to save downloaded content into file", zap.Error(err))
+	}
+
+	if plugin.AddToLocalMaven {
+		// mvn install:install-file -Dfile=./SloverHUD-2.0-SNAPSHOT-all.jar -DgroupId=com.marcusslover -DartifactId=SloverHUD -Dversion=2.0-SNAPSHOT -Dpackaging=jar
+		filePath := filepath.Join(outdir, plugin.Filename())
+
+		cmd := exec.Command("mvn", "install:install-file",
+			fmt.Sprintf("-Dfile=%s", filePath),
+			fmt.Sprintf("-DgroupId=%s", plugin.LocalMavenConfig.GroupId),
+			fmt.Sprintf("-DartifactId=%s", plugin.LocalMavenConfig.ArtifactId),
+			fmt.Sprintf("-Dversion=%s", plugin.LocalMavenConfig.Version),
+			"-Dpackaging=jar",
+		)
+
+		out, err := cmd.Output()
+
+		if err != nil {
+			logger.Error("Failed to add plugin to local maven repository", zap.Error(err))
+			log.Default().Print(string(out))
+		} else {
+			log.Default().Print(string(out))
+			logger.Info("Added plugin to local repository")
+		}
 	}
 
 	return nil

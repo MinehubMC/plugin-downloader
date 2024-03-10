@@ -16,11 +16,20 @@ type Credentials struct {
 }
 
 type Plugin struct {
-	RepositoryUrl string `json:"repositoryUrl,omitempty"`
-	DownloadUrl   string `json:"downloadUrl,omitempty"`
-	Credentials   string `json:"credentials,omitempty"`
-	Artifact      string `json:"artifact,omitempty"`
-	SaveAs        string `json:"saveAs,omitempty"`
+	RepositoryUrl    string            `json:"repositoryUrl,omitempty"`
+	DownloadUrl      string            `json:"downloadUrl,omitempty"`
+	Credentials      string            `json:"credentials,omitempty"`
+	Artifact         string            `json:"artifact,omitempty"`
+	SaveAs           string            `json:"saveAs,omitempty"`
+	Tags             []string          `json:"tags,omitempty"`
+	AddToLocalMaven  bool              `json:"addToLocalMaven,omitempty"`
+	LocalMavenConfig *LocalMavenConfig `json:"localMaven,omitempty"`
+}
+
+type LocalMavenConfig struct {
+	GroupId    string `json:"groupId,omitempty"`
+	ArtifactId string `json:"artifactId,omitempty"`
+	Version    string `json:"version,omitempty"`
 }
 
 func (p Plugin) GetDownloadURL() string {
