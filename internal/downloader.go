@@ -68,7 +68,6 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 	}
 
 	if plugin.AddToLocalMaven {
-		// mvn install:install-file -Dfile=./SloverHUD-2.0-SNAPSHOT-all.jar -DgroupId=com.marcusslover -DartifactId=SloverHUD -Dversion=2.0-SNAPSHOT -Dpackaging=jar
 		filePath := filepath.Join(outdir, plugin.Filename())
 
 		cmd := exec.Command("mvn", "install:install-file",
