@@ -12,6 +12,9 @@ inputs:
   output-folder:
     description: Path to the output folder where dependencies are downloaded to, default is .
     required: false
+  tags:
+    description: filter plugins using tags, separated by commas
+    required: false
 
 runs:
   using: docker
@@ -19,3 +22,4 @@ runs:
   args:
     - ${{ inputs.config-file && format('--config {0}', inputs.config-file) }}
     - ${{ inputs.output-folder && format('--out {0}', inputs.output-folder) }}
+    - ${{ inputs.tags && format('--tags {0}', inputs.tags) }}
