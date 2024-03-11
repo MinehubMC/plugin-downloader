@@ -1,6 +1,6 @@
 FROM alpine
 
-RUN apk add --no-cache bash
+RUN apk add --no-cache bash maven
 
 ADD plugin-downloader /usr/local/bin/plugin-downloader
 COPY entrypoint.sh /entrypoint.sh

@@ -11,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func Download(config *Config, outdir string, logger *zap.Logger, tags []string) []error {
+func Download(config *Config, outdir string, logger *zap.Logger, tags []string, m2RepoPath string) []error {
 	var errs []error
 
 	checkTags := len(tags) != 0
@@ -26,7 +26,7 @@ func Download(config *Config, outdir string, logger *zap.Logger, tags []string) 
 			continue
 		}
 
-		err := handlePlugin(value, config, outdir, logger)
+		err := handlePlugin(value, config, outdir, logger, m2RepoPath)
 
 		if err != nil {
 			errs = append(errs,
@@ -39,7 +39,7 @@ func Download(config *Config, outdir string, logger *zap.Logger, tags []string) 
 	return errs
 }
 
-func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logger) error {
+func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logger, m2RepoPath string) error {
 	if plugin.GetDownloadURL() == "" {
 		return nil
 	}
@@ -88,6 +88,7 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 			fmt.Sprintf("-DartifactId=%s", plugin.LocalMavenConfig.ArtifactId),
 			fmt.Sprintf("-Dversion=%s", plugin.LocalMavenConfig.Version),
 			"-Dpackaging=jar",
+			fmt.Sprintf("-DlocalRepositoryPath=%s", m2RepoPath),
 		)
 
 		out, err := cmd.Output()

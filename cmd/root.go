@@ -11,8 +11,9 @@ import (
 )
 
 var (
-	configFilePath string
-	outputFolder   string
+	configFilePath  string
+	outputFolder    string
+	localM2RepoPath string
 
 	rootCmd = &cobra.Command{
 		Use:   "pld",
@@ -36,7 +37,7 @@ var (
 				log.Fatal(err)
 			}
 
-			errs := internal.Download(config, outputFolder, logger, filterTags)
+			errs := internal.Download(config, outputFolder, logger, filterTags, localM2RepoPath)
 
 			if len(errs) > 0 {
 				for _, err := range errs {
@@ -54,6 +55,7 @@ func init() {
 	rootCmd.PersistentFlags().StringVar(&configFilePath, "config", "dependencies.json", "config file (default is $PWD/dependencies.json)")
 	rootCmd.PersistentFlags().StringVar(&outputFolder, "out", ".", "download output folder (default is .)")
 	rootCmd.PersistentFlags().StringSlice("tags", []string{}, "comma-separated list of tags to filter plugins by")
+	rootCmd.PersistentFlags().StringVar(&localM2RepoPath, "local-maven-repository", "~/.m2", "change the repository where dependencies are installed to")
 }
 
 func Execute() {
