@@ -19,10 +19,14 @@ inputs:
     description: the local maven repository path
     required: false
     default: /github/workspace/localM2Repository
+  version:
+    description: which version to use
+    required: false
+    default: latest
 
 runs:
   using: docker
-  image: ./Dockerfile.goreleaser
+  image: docker://ghcr.io/minehubmc/plugin-downloader:{{ inputs.version }}
   args:
     - ${{ inputs.config-file && format('--config {0}', inputs.config-file) }}
     - ${{ inputs.output-folder && format('--out {0}', inputs.output-folder) }}
