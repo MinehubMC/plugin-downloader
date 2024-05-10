@@ -38,7 +38,6 @@ func extractFileFromJar(jarPath, fileToExtract string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer jarFile.Close()
 
 	// Find the file to extract in the JAR
 	var foundFile *zip.File
