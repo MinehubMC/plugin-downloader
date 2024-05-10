@@ -70,7 +70,7 @@ func handleItem(item DownloadableItem, credentials map[string]Credentials, outdi
 	}
 
 	if response.StatusCode < 200 || response.StatusCode >= 300 {
-		return fmt.Errorf("unexpected status code: %d", response.StatusCode)
+		return fmt.Errorf("unexpected status code (%s): %d", item.GetDownloadURL(), response.StatusCode)
 	}
 
 	err = SaveContentToFile(item.Filename(), response.Body, outdir, logger)
