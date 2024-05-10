@@ -15,15 +15,19 @@ type Credentials struct {
 	Password string `json:"password"`
 }
 
-type Plugin struct {
-	RepositoryUrl    string            `json:"repositoryUrl,omitempty"`
-	DownloadUrl      string            `json:"downloadUrl,omitempty"`
-	Credentials      string            `json:"credentials,omitempty"`
-	Artifact         string            `json:"artifact,omitempty"`
-	SaveAs           string            `json:"saveAs,omitempty"`
-	Tags             []string          `json:"tags,omitempty"`
-	AddToLocalMaven  bool              `json:"addToLocalMaven,omitempty"`
-	LocalMavenConfig *LocalMavenConfig `json:"localMaven,omitempty"`
+type DownloadableItem struct {
+	Credentials     string   `json:"credentials,omitempty"`
+	AddToLocalMaven bool     `json:"addToLocalMaven,omitempty"`
+	Tags            []string `json:"tags,omitempty"`
+
+	DownloadUrl string `json:"downloadUrl,omitempty"`
+	// should not be used with repositoryUrl
+	SaveAs string `json:"saveAs,omitempty"`
+
+	RepositoryUrl string `json:"repositoryUrl,omitempty"`
+	ArtifactID    string `json:"artifactId,omitempty"`
+	GroupID       string `json:"groupId,omitempty"`
+	Version       string `json:"version,omitempty"`
 }
 
 type LocalMavenConfig struct {
@@ -32,25 +36,19 @@ type LocalMavenConfig struct {
 	Version    string `json:"version,omitempty"`
 }
 
-func (p Plugin) GetDownloadURL() string {
+func (p DownloadableItem) GetDownloadURL() string {
 	if p.DownloadUrl != "" {
 		return p.DownloadUrl
 	}
-	if p.RepositoryUrl != "" && p.Artifact != "" {
-		parts := strings.Split(p.Artifact, ":")
-		if len(parts) != 3 {
-			return "" // invalid format
-		}
-		groupId := strings.ReplaceAll(parts[0], ".", "/")
-		artifactId := parts[1]
-		version := parts[2]
 
-		return fmt.Sprintf("%s/%s/%s/%s/%s-%s.jar", p.RepositoryUrl, groupId, artifactId, version, artifactId, version)
+	if p.RepositoryUrl != "" && p.GroupID != "" && p.ArtifactID != "" && p.Version != "" {
+		return fmt.Sprintf("%s/%s/%s/%s/%s-%s.jar", p.RepositoryUrl, p.GroupID, p.ArtifactID, p.Version, p.ArtifactID, p.Version)
 	}
+
 	return ""
 }
 
-func (p Plugin) Filename() string {
+func (p DownloadableItem) Filename() string {
 	// sometimes the download url may end with /download so it won't have the .jar extension and stuff like that
 	if p.SaveAs != "" {
 		return p.SaveAs
@@ -61,7 +59,8 @@ func (p Plugin) Filename() string {
 
 type Config struct {
 	Credentials map[string]Credentials `json:"credentials"`
-	Plugins     []Plugin               `json:"plugins"`
+	Plugins     []DownloadableItem     `json:"plugins"`
+	Libraries   []DownloadableItem     `json:"libraries"` // the only difference between plugins and libs is that plugins array will be copied to the final jar to be downloaded later
 }
 
 func Parse(filePath string, logger *zap.Logger) *Config {
@@ -103,4 +102,18 @@ func replaceEnvVar(s string) (string, error) {
 		return "", fmt.Errorf("environment variable not found: %s", envVar)
 	}
 	return s, nil
+}
+
+func GetPlugins(config *Config) []DownloadableItem {
+	pl := config.Plugins
+
+	for _, lib := range config.Libraries {
+		for _, tag := range lib.Tags {
+			if tag == "plugin" {
+				pl = append(pl, lib)
+			}
+		}
+	}
+
+	return pl
 }

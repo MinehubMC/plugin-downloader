@@ -3,9 +3,7 @@ package internal
 import (
 	"bytes"
 	"fmt"
-	"log"
 	"net/http"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -13,7 +11,7 @@ import (
 	"go.uber.org/zap"
 )
 
-func Download(config *Config, outdir string, logger *zap.Logger, tags []string, m2RepoPath string) []error {
+func Download(items []DownloadableItem, credentials map[string]Credentials, outdir string, logger *zap.Logger, tags []string, m2RepoPath string) []error {
 	var errs []error
 
 	checkTags := len(tags) != 0
@@ -22,13 +20,13 @@ func Download(config *Config, outdir string, logger *zap.Logger, tags []string, 
 		logger.Info("Filtering based on tags", zap.String("tags", strings.Join(tags, ",")))
 	}
 
-	for _, value := range config.Plugins {
+	for _, value := range items {
 		if checkTags && !commonTags(tags, value.Tags) {
-			logger.Info("Skipping plugin, not included in tags", zap.String("plugin", value.Filename()), zap.String("tags", strings.Join(value.Tags, ",")))
+			logger.Info("Skipping item, not included in tags", zap.String("item", value.Filename()), zap.String("tags", strings.Join(value.Tags, ",")))
 			continue
 		}
 
-		err := handlePlugin(value, config, outdir, logger, m2RepoPath)
+		err := handleItem(value, credentials, outdir, logger, m2RepoPath)
 
 		if err != nil {
 			errs = append(errs,
@@ -41,30 +39,30 @@ func Download(config *Config, outdir string, logger *zap.Logger, tags []string, 
 	return errs
 }
 
-func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logger, m2RepoPath string) error {
-	if plugin.GetDownloadURL() == "" {
+func handleItem(item DownloadableItem, credentials map[string]Credentials, outdir string, logger *zap.Logger, m2RepoPath string) error {
+	if item.GetDownloadURL() == "" {
 		return nil
 	}
 
 	httpClient := &http.Client{}
 
-	req, err := http.NewRequest("GET", plugin.GetDownloadURL(), nil)
+	req, err := http.NewRequest("GET", item.GetDownloadURL(), nil)
 
 	if err != nil {
 		return fmt.Errorf("failed to create new http client: %w", err)
 	}
 
-	if plugin.Credentials != "" {
-		creds, ok := config.Credentials[plugin.Credentials]
+	if item.Credentials != "" {
+		creds, ok := credentials[item.Credentials]
 
 		if !ok {
-			return fmt.Errorf("invalid credentials reference for plugin: %s", plugin.GetDownloadURL())
+			return fmt.Errorf("invalid credentials reference for item: %s", item.GetDownloadURL())
 		}
 
 		req.SetBasicAuth(creds.Username, creds.Password)
 	}
 
-	logger.Info("Downloading plugin", zap.String("url", plugin.GetDownloadURL()))
+	logger.Info("Downloading item", zap.String("url", item.GetDownloadURL()))
 	response, err := httpClient.Do(req)
 
 	if err != nil {
@@ -75,20 +73,20 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 		return fmt.Errorf("unexpected status code: %d", response.StatusCode)
 	}
 
-	err = SaveContentToFile(plugin.Filename(), response.Body, outdir, logger)
+	err = SaveContentToFile(item.Filename(), response.Body, outdir, logger)
 
 	if err != nil {
 		logger.Error("Failed to save downloaded content into file", zap.Error(err))
 	}
 
-	if plugin.AddToLocalMaven {
-		filePath := filepath.Join(outdir, plugin.Filename())
+	if item.AddToLocalMaven {
+		filePath := filepath.Join(outdir, item.Filename())
 
 		cmd := exec.Command("mvn", "install:install-file",
 			fmt.Sprintf("-Dfile=%s", filePath),
-			fmt.Sprintf("-DgroupId=%s", plugin.LocalMavenConfig.GroupId),
-			fmt.Sprintf("-DartifactId=%s", plugin.LocalMavenConfig.ArtifactId),
-			fmt.Sprintf("-Dversion=%s", plugin.LocalMavenConfig.Version),
+			fmt.Sprintf("-DgroupId=%s", item.GroupID),
+			fmt.Sprintf("-DartifactId=%s", item.ArtifactID),
+			fmt.Sprintf("-Dversion=%s", item.Version),
 			"-Dpackaging=jar",
 			fmt.Sprintf("-DlocalRepositoryPath=%s", m2RepoPath),
 		)
@@ -99,14 +97,12 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 
 		err := cmd.Run()
 
-		if err != nil {
-			logger.Error("Failed to add plugin to local maven repository", zap.Error(err), zap.String("stderr", stderr.String()))
-			log.Default().Print(out.String())
+		logger.Debug("maven logs", zap.String("stdout", out.String()), zap.String("stderr", stderr.String()))
 
-			os.Exit(1)
+		if err != nil {
+			return fmt.Errorf("failed to add item to local maven repository: %s", err)
 		} else {
-			log.Default().Print(out.String())
-			logger.Info("Added plugin to local repository")
+			logger.Info("Added item to local repository", zap.String("name", item.Filename()))
 		}
 	}
 
