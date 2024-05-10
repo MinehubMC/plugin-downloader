@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -91,6 +92,9 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 			"-Dpackaging=jar",
 			fmt.Sprintf("-DlocalRepositoryPath=%s", m2RepoPath),
 		)
+
+		// otherwise JAVA_HOME would not be defined
+		cmd.Env = os.Environ()
 
 		var out, stderr bytes.Buffer
 		cmd.Stdout = &out
