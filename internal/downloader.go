@@ -1,6 +1,7 @@
 package internal
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"net/http"
@@ -91,13 +92,17 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 			fmt.Sprintf("-DlocalRepositoryPath=%s", m2RepoPath),
 		)
 
-		out, err := cmd.Output()
+		var out, stderr bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Stderr = &stderr
+
+		err := cmd.Run()
 
 		if err != nil {
-			logger.Error("Failed to add plugin to local maven repository", zap.Error(err))
-			log.Default().Print(string(out))
+			logger.Error("Failed to add plugin to local maven repository", zap.Error(err), zap.String("stderr", stderr.String()))
+			log.Default().Print(out.String())
 		} else {
-			log.Default().Print(string(out))
+			log.Default().Print(out.String())
 			logger.Info("Added plugin to local repository")
 		}
 	}
