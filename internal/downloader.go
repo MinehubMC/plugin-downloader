@@ -93,9 +93,6 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 			fmt.Sprintf("-DlocalRepositoryPath=%s", m2RepoPath),
 		)
 
-		// otherwise JAVA_HOME would not be defined
-		cmd.Env = os.Environ()
-
 		var out, stderr bytes.Buffer
 		cmd.Stdout = &out
 		cmd.Stderr = &stderr
@@ -105,6 +102,8 @@ func handlePlugin(plugin Plugin, config *Config, outdir string, logger *zap.Logg
 		if err != nil {
 			logger.Error("Failed to add plugin to local maven repository", zap.Error(err), zap.String("stderr", stderr.String()))
 			log.Default().Print(out.String())
+
+			os.Exit(1)
 		} else {
 			log.Default().Print(out.String())
 			logger.Info("Added plugin to local repository")
