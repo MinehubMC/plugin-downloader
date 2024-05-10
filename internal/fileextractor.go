@@ -24,6 +24,7 @@ func extractDependenciesJSONFromJar(logger *zap.Logger, path string) (*Config, e
 
 	var conf Config
 	err = json.NewDecoder(readCloser).Decode(&conf)
+	defer readCloser.Close()
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode json from readcloser: %s", err)
 	}
@@ -57,7 +58,6 @@ func extractFileFromJar(jarPath, fileToExtract string) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer zipFile.Close()
 
 	return zipFile, nil
 }
