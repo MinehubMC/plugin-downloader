@@ -19,12 +19,17 @@ inputs:
     description: the local maven repository path
     required: false
     default: /github/workspace/localM2Repository
+  subcommand:
+    description: which things to download, plugins or libraries
+    required: true
+    default: plugins
 
 runs:
   using: docker
-  image: docker://ghcr.io/minehubmc/plugin-downloader:v2.0.0
+  image: docker://ghcr.io/minehubmc/plugin-downloader:v2.0.1
   args:
     - ${{ inputs.config-file && format('--config {0}', inputs.config-file) }}
     - ${{ inputs.output-folder && format('--out {0}', inputs.output-folder) }}
     - ${{ inputs.tags && format('--tags {0}', inputs.tags) }}
     - ${{ inputs.maven-repository && format('--local-maven-repository {0}', inputs.maven-repository) }}
+    - ${{ inputs.subdommand }}
