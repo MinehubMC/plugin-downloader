@@ -22,7 +22,7 @@ inputs:
 
 runs:
   using: docker
-  image: docker://ghcr.io/minehubmc/plugin-downloader:v1.3.6
+  image: docker://ghcr.io/minehubmc/plugin-downloader:v1.3.7
   args:
     - ${{ inputs.config-file && format('--config {0}', inputs.config-file) }}
     - ${{ inputs.output-folder && format('--out {0}', inputs.output-folder) }}
