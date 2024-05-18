@@ -27,10 +27,6 @@ var pluginCmd = &cobra.Command{
 
 		config := internal.Parse(configFilePath, logger)
 
-		if len(config.Libraries) <= 0 {
-			logger.Fatal("no libraries defined")
-		}
-
 		if err := internal.PrepareOutputFolder(outputFolder, logger); err != nil {
 			logger.Fatal("Failed to prepare output folder", zap.Error(err))
 		}
