@@ -4,7 +4,7 @@ go 1.21.5
 
 require (
 	github.com/spf13/cobra v1.8.0
-	go.uber.org/zap v1.27.0
+	go.uber.org/zap v1.28.0
 )
 
 require (
